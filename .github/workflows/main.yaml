@@ -31,7 +31,7 @@ jobs:
         export DATABASE_USER="usuario"
         export DATABASE_PASS="clave"
         sh /usr/local/tomcat/bin/catalina.sh stop
-        h /usr/local/tomcat/bin/catalina.sh start
+        sh /usr/local/tomcat/bin/catalina.sh start
     - name: realizar pruebas funcionales
       run: | 
         mvn failsafe:integration-test failsafe:verify
