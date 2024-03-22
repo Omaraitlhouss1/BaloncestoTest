@@ -3,7 +3,7 @@ on: push
 jobs:
   build:
     runs-on: self-hosted
-    steps:
+    steps: 
       - name: descargar repostorio 
         uses: actions/checkout@v3
       - name: pruebas-unitarias
