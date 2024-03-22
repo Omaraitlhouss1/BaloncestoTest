@@ -17,11 +17,11 @@ jobs:
       run: echo "pruebas-funcionales"
 
   qa:
-  needs: test
-  runs-on: self-hosted
-  steps:
-  - name: calidad-codigo
-    run: echo "calidad-codigo"
+    needs: test
+    runs-on: self-hosted
+    steps:
+    - name: calidad-codigo
+      run: echo "calidad-codigo"
 
   deploy:
     needs: qa
