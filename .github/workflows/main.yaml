@@ -1,68 +1,66 @@
 name: CI
-
 on: push
-
 jobs:
   build:
     runs-on: ubuntu-latest
     steps: 
-      - name: descargar repositorio  
+      - name: descargar repostorio  
         uses: actions/checkout@v3
       - name: pruebas-unitarias
         run: mvn test
       - name: compilar la aplicación sin repetir pruebas
         run: mvn package -DskipTests=true
 
+
   test:
     needs: build
     runs-on: self-hosted
     steps:
-      - name: descargar repositorio
-        uses: actions/checkout@v3
-      - name: instalar aplicación en Tomcat
-        run: |
-          mvn package -DskipTests=true
-          cp -r target/Baloncesto /usr/local/tomcat/webapps
-      - name: preparar base de datos de prueba
-        env:
-          DATABASE_USER: root
-          DATABASE_PASS: ${{ secrets.MYSQL_ROOT_PASSWORD }}
-        run: |
-          echo "create database if not exists baloncesto; use baloncesto;" | mysql -u ${{ env.DATABASE_USER }} -p${{ env.DATABASE_PASS }}
-          cat db/baloncesto.sql | mysql -u ${{ env.DATABASE_USER }} -p${{ env.DATABASE_PASS }} baloncesto
-          echo "DATABASE_HOST=jdbc:mysql://localhost" >> $GITHUB_ENV
-          echo "DATABASE_PORT=3000" >> $GITHUB_ENV
-          echo "DATABASE_NAME=baloncesto" >> $GITHUB_ENV
-          echo "DATABASE_USER=${{ env.DATABASE_USER }}" >> $GITHUB_ENV
-          echo "DATABASE_PASS=${{ env.DATABASE_PASS }}" >> $GITHUB_ENV
-          sudo /usr/local/tomcat/bin/catalina.sh stop
-          sudo /usr/local/tomcat/bin/catalina.sh start
-      - name: realizar pruebas funcionales
-        run: | 
-          mvn failsafe:integration-test failsafe:verify
+    - name: descargar repostorio
+      uses: actions/checkout@v3
+    - name: instalar aplicación en Tomcat
+      run: |
+        mvn package -DskipTests=true
+        cp -r target/Baloncesto /usr/local/tomcat/webapps
+    - name: preparar base de datos de prueba
+      run: |
+        mysql -u root < db/baloncesto.sql
+        export DATABASE_HOST="jdbc:mysql://localhost"
+        export DATABASE_PORT="3000"
+        export DATABASE_NAME="baloncesto"
+        export DATABASE_USER="usuario"
+        export DATABASE_PASS="clave"
+        sh /usr/local/tomcat/bin/catalina.sh stop
+        sh /usr/local/tomcat/bin/catalina.sh start
+  
+    - name: realizar pruebas funcionales
+      run: | 
+        mvn failsafe:integration-test failsafe:verify
+
 
   qa:
     needs: test
     runs-on: self-hosted
     continue-on-error: true
     steps:
-      - name: calidad-codigo
-        run: |
-          mvn sonar:sonar -Dsonar.host.url=http://sonarqube:9000 -Dsonar.qualitygate.wait=true -Dsonar.login=admin -Dsonar.password=adminn
+    - name: calidad-codigo
+      run:  |
+        mvn sonar:sonar -Dsonar.host.url=http://sonarqube:9000 -Dsonar.qualitygate.wait=true -Dsonar.login=admin -Dsonar.password=adminn
+
 
   deploy:
     needs: qa
     runs-on: ubuntu-latest
     if: github.ref == 'refs/heads/master'
     steps:
-      - name: Descargar repositorio
-        uses: actions/checkout@v3
-      - name: Crear el archivo .war
-        run: |
-          mvn package -DskipTests=true
-      - name: Desplegar en Azure
-        uses: Azure/webapps-deploy@v2
-        with:
-          app-name: Baloncesto-Omar
-          publish-profile: ${{ secrets.AZURE_WEBAPP_PUBLISH_PROFILE }}
-          package: target/*.war
+    - name: Descargar repositorio
+      uses: actions/checkout@v3
+    - name: Crear el archivo .war
+      run: |
+        mvn package -DskipTests=true
+    - name: Desplegar en Azure
+      uses: Azure/webapps-deploy@v2
+      with:
+        app-name: Baloncesto-Omar
+        publish-profile: ${{ secrets.AZURE_WEBAPP_PUBLISH_PROFILE }}
+        package: target/*.war
