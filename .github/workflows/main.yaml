@@ -26,16 +26,17 @@ jobs:
       - name: preparar base de datos de prueba
         env:
           DATABASE_USER: root
-          DATABASE_PASS: admin
+          DATABASE_PASS: ${{ secrets.MYSQL_ROOT_PASSWORD }}
         run: |
-          mysql -u root -p${{ secrets.MYSQL_ROOT_PASSWORD }} < db/baloncesto.sql
+          echo "create database if not exists baloncesto; use baloncesto;" | mysql -u ${{ env.DATABASE_USER }} -p${{ env.DATABASE_PASS }}
+          cat db/baloncesto.sql | mysql -u ${{ env.DATABASE_USER }} -p${{ env.DATABASE_PASS }} baloncesto
           echo "DATABASE_HOST=jdbc:mysql://localhost" >> $GITHUB_ENV
           echo "DATABASE_PORT=3000" >> $GITHUB_ENV
           echo "DATABASE_NAME=baloncesto" >> $GITHUB_ENV
           echo "DATABASE_USER=${{ env.DATABASE_USER }}" >> $GITHUB_ENV
           echo "DATABASE_PASS=${{ env.DATABASE_PASS }}" >> $GITHUB_ENV
-          sudo sh /usr/local/tomcat/bin/catalina.sh stop
-          sudo sh /usr/local/tomcat/bin/catalina.sh start
+          sudo /usr/local/tomcat/bin/catalina.sh stop
+          sudo /usr/local/tomcat/bin/catalina.sh start
       - name: realizar pruebas funcionales
         run: | 
           mvn failsafe:integration-test failsafe:verify
