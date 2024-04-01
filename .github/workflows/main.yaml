@@ -14,14 +14,14 @@ jobs:
 
   test:
     needs: build
-    runs-on: runner
+    runs-on: self-hosted
     steps:
     - name: descargar repostorio
       uses: actions/checkout@v3
     - name: instalar aplicación en Tomcat
       run: |
         mvn package -DskipTests=true
-        sudo cp -r target/Baloncesto /usr/local/tomcat/webapps
+        cp -r target/Baloncesto /usr/local/tomcat/webapps
     - name: preparar base de datos de prueba
       run: |
         mysql -u root < db/baloncesto.sql
@@ -40,7 +40,7 @@ jobs:
 
   qa:
     needs: test
-    runs-on: runner
+    runs-on: self-hosted
     continue-on-error: true
     steps:
     - name: calidad-codigo
