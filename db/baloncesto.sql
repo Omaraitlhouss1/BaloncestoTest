@@ -5,7 +5,7 @@ USE baloncesto;
 CREATE TABLE `Jugadores` (
 	`id` INT NOT NULL AUTO_INCREMENT,
 	`nombre` VARCHAR(50) NOT NULL DEFAULT '',
-	`votos` INT NOT NULL DEFAULT 0,
+	`votos` INT NOT NULL DEFAULT 0, 
 	PRIMARY KEY (`id`),
 	UNIQUE INDEX `UNIQUE_KEY` (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_general_ci;
