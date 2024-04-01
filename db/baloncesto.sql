@@ -13,7 +13,7 @@ CREATE TABLE `Jugadores` (
 
 INSERT INTO Jugadores (id, nombre, votos) VALUES (1, 'Llull', 0);
 INSERT INTO Jugadores (id, nombre, votos) VALUES (2, 'Rudy', 0);
-INSERT INTO Jugadores (id, nombre, votos) VALUES (3, 'Tavares', 0);
+INSERT INTO Jugadores (id, nombre, votos) VALUES (3, 'Tavare', 0);
 
 
 CREATE USER IF NOT EXISTS 'usuario'@'localhost' IDENTIFIED BY 'clave';
