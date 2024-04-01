@@ -2,7 +2,7 @@ name: CI
 on: push
 jobs:
   build:
-    runs-on: self-hosted 
+    runs-on: ubuntu-latest
     steps: 
       - name: descargar repostorio  
         uses: actions/checkout@v3
@@ -24,12 +24,14 @@ jobs:
         sudo cp -r target/Baloncesto /usr/local/tomcat/webapps
     - name: preparar base de datos de prueba
       run: |
-        sudo mysql -u root < db/baloncesto.sql
+        mysql -u root < db/baloncesto.sql
         export DATABASE_HOST="jdbc:mysql://localhost"
         export DATABASE_PORT="3306"
         export DATABASE_NAME="baloncesto"
         export DATABASE_USER="usuario"
         export DATABASE_PASS="clave"
+        sh /usr/local/tomcat/bin/catalina.sh stop
+        sh /usr/local/tomcat/bin/catalina.sh start
   
     - name: realizar pruebas funcionales
       run: | 
