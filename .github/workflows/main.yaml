@@ -14,7 +14,7 @@ jobs:
 
   test:
     needs: build
-    runs-on: self-hosted
+    runs-on: runner
     steps:
     - name: descargar repostorio
       uses: actions/checkout@v3
@@ -40,7 +40,7 @@ jobs:
 
   qa:
     needs: test
-    runs-on: self-hosted
+    runs-on: runner
     continue-on-error: true
     steps:
     - name: calidad-codigo
