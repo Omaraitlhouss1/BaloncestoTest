@@ -36,7 +36,7 @@ jobs:
           echo "DATABASE_NAME=baloncesto" >> $GITHUB_ENV
           echo "DATABASE_USER=usuario" >> $GITHUB_ENV
           echo "DATABASE_PASS=${{ secrets.DATABASE_PASS }}" >> $GITHUB_ENV
-        shell: pwsh
+        shell: powershell
         env:
           DATABASE_USER: usuario
           DATABASE_PASS: ${{ secrets.DATABASE_PASS }}
