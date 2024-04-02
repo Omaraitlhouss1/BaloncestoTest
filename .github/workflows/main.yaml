@@ -37,8 +37,8 @@ jobs:
           echo "DATABASE_NAME=baloncesto" | Out-File -Append -FilePath $Env:GITHUB_ENV
           echo "DATABASE_USER=usuario" | Out-File -Append -FilePath $Env:GITHUB_ENV
           echo "DATABASE_PASS=clave" | Out-File -Append -FilePath $Env:GITHUB_ENV
-          /usr/local/tomcat/bin/catalina.sh stop
-          /usr/local/tomcat/bin/catalina.sh start
+          sh /usr/local/tomcat/bin/catalina.sh stop
+          sh /usr/local/tomcat/bin/catalina.sh start
         shell: powershell
         env:
           DATABASE_PASS: ${{ secrets.DATABASE_PASS }}
