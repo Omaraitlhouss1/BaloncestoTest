@@ -34,11 +34,11 @@ jobs:
           echo "DATABASE_HOST=jdbc:mysql://localhost" >> $GITHUB_ENV
           echo "DATABASE_PORT=3000" >> $GITHUB_ENV
           echo "DATABASE_NAME=baloncesto" >> $GITHUB_ENV
-          echo "DATABASE_USER=usuario" >> $GITHUB_ENV
+          echo "DATABASE_USER=root" >> $GITHUB_ENV
           echo "DATABASE_PASS=${{ secrets.DATABASE_PASS }}" >> $GITHUB_ENV
         shell: powershell
         env:
-          DATABASE_USER: usuario
+          DATABASE_USER: root
           DATABASE_PASS: ${{ secrets.DATABASE_PASS }}
 
       - name: Restart Tomcat
