@@ -31,12 +31,12 @@ jobs:
 
       - name: Prepare test database (Windows PowerShell)
         run: |
-          Get-Content db/baloncesto.sql -Raw | mysql -u usuario -p$env:DATABASE_PASS
-          echo "DATABASE_HOST=jdbc:mysql://localhost" | Out-File -Append -FilePath $Env:GITHUB_ENV
-          echo "DATABASE_PORT=3000" | Out-File -Append -FilePath $Env:GITHUB_ENV
-          echo "DATABASE_NAME=baloncesto" | Out-File -Append -FilePath $Env:GITHUB_ENV
-          echo "DATABASE_USER=usuario" | Out-File -Append -FilePath $Env:GITHUB_ENV
-          echo "DATABASE_PASS=clave" | Out-File -Append -FilePath $Env:GITHUB_ENV
+          mysql -u root < db/baloncesto.sql
+          export DATABASE_HOST="jdbc:mysql://localhost"
+          export DATABASE_PORT="3000"
+          export DATABASE_NAME="baloncesto"
+          export DATABASE_USER="root"
+          export DATABASE_PASS="admin"
           sh /usr/local/tomcat/bin/catalina.sh stop
           sh /usr/local/tomcat/bin/catalina.sh start
         shell: powershell
