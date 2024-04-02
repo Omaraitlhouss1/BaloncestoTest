@@ -1,18 +1,14 @@
 name: CI
-
 on: push
-
 jobs:
   build:
     runs-on: ubuntu-latest
     steps: 
-      - name: Checkout repository  
+      - name: descargar repostorio  
         uses: actions/checkout@v3
-
-      - name: Unit tests
+      - name: pruebas-unitarias
         run: mvn test
-
-      - name: Compile application without repeating tests
+      - name: compilar la aplicación sin repetir pruebas
         run: mvn package -DskipTests=true
 
 
@@ -20,29 +16,24 @@ jobs:
     needs: build
     runs-on: self-hosted
     steps:
-    - name: Checkout repository
+    - name: descargar repostorio
       uses: actions/checkout@v3
-
-    - name: Install application in Tomcat
+    - name: instalar aplicación en Tomcat
       run: |
         mvn package -DskipTests=true
         cp -r target/Baloncesto /usr/local/tomcat/webapps
-
-    - name: Prepare test database
-      env:
-        DATABASE_USER: usuario
-        DATABASE_PASS: ${{ secrets.DATABASE_PASS }}
+    - name: preparar base de datos de prueba
       run: |
-        mysql -u $DATABASE_USER -p$DATABASE_PASS < db/baloncesto.sql
-        echo "DATABASE_HOST=jdbc:mysql://localhost" >> $GITHUB_ENV
-        echo "DATABASE_PORT=3000" >> $GITHUB_ENV
-        echo "DATABASE_NAME=baloncesto" >> $GITHUB_ENV
-        echo "DATABASE_USER=${{ env.DATABASE_USER }}" >> $GITHUB_ENV
-        echo "DATABASE_PASS=${{ secrets.DATABASE_PASS }}" >> $GITHUB_ENV
+        mysql -u root < db/baloncesto.sql
+        export DATABASE_HOST="jdbc:mysql://localhost"
+        export DATABASE_PORT="3000"
+        export DATABASE_NAME="baloncesto"
+        export DATABASE_USER="usuario"
+        export DATABASE_PASS="clave"
         sh /usr/local/tomcat/bin/catalina.sh stop
         sh /usr/local/tomcat/bin/catalina.sh start
-
-    - name: Functional tests
+  
+    - name: realizar pruebas funcionales
       run: | 
         mvn failsafe:integration-test failsafe:verify
 
@@ -52,8 +43,8 @@ jobs:
     runs-on: self-hosted
     continue-on-error: true
     steps:
-    - name: Code quality
-      run: |
+    - name: calidad-codigo
+      run:  |
         mvn sonar:sonar -Dsonar.host.url=http://sonarqube:9000 -Dsonar.qualitygate.wait=true -Dsonar.login=admin -Dsonar.password=adminn
 
 
@@ -62,14 +53,12 @@ jobs:
     runs-on: ubuntu-latest
     if: github.ref == 'refs/heads/master'
     steps:
-    - name: Checkout repository
+    - name: Descargar repositorio
       uses: actions/checkout@v3
-
-    - name: Create .war file
+    - name: Crear el archivo .war
       run: |
         mvn package -DskipTests=true
-
-    - name: Deploy to Azure
+    - name: Desplegar en Azure
       uses: Azure/webapps-deploy@v2
       with:
         app-name: Baloncesto-Omar
