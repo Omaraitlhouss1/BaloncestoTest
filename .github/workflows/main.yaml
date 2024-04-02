@@ -23,24 +23,28 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v3
 
-      - name: Install application in Tomcat
+      - name: Install application in Tomcat (Windows PowerShell)
         run: |
           mvn package -DskipTests=true
-          cp -r target/Baloncesto /usr/local/tomcat/webapps
+          Copy-Item -Path target/Baloncesto -Destination C:/usr/local/tomcat/webapps -Recurse -Force
+        shell: powershell
 
-      - name: Prepare test database
+      - name: Prepare test database (Windows PowerShell)
         run: |
-          mysql -u root < db/baloncesto.sql
-          export DATABASE_HOST="jdbc:mysql://localhost"
-          export DATABASE_PORT="3000"
-          export DATABASE_NAME="baloncesto"
-          export DATABASE_USER="usuario"
-          export DATABASE_PASS="clave"
-          sh /usr/local/tomcat/bin/catalina.sh stop
-          sh /usr/local/tomcat/bin/catalina.sh start
-      - name: realizar pruebas funcionales
-        run: |
-          mvn failsafe:integration-test failsafe:verify
+          Get-Content db/baloncesto.sql -Raw | mysql -u usuario -p$env:DATABASE_PASS
+          echo "DATABASE_HOST=jdbc:mysql://localhost" | Out-File -Append -FilePath $Env:GITHUB_ENV
+          echo "DATABASE_PORT=3000" | Out-File -Append -FilePath $Env:GITHUB_ENV
+          echo "DATABASE_NAME=baloncesto" | Out-File -Append -FilePath $Env:GITHUB_ENV
+          echo "DATABASE_USER=usuario" | Out-File -Append -FilePath $Env:GITHUB_ENV
+          echo "DATABASE_PASS=clave" | Out-File -Append -FilePath $Env:GITHUB_ENV
+          .\catalina.bat stop
+          .\catalina.bat start
+        shell: powershell
+        env:
+          DATABASE_PASS: ${{ secrets.DATABASE_PASS }}
+
+      - name: Run functional tests
+        run: mvn failsafe:integration-test failsafe:verify
 
   qa:
     needs: test
@@ -50,7 +54,6 @@ jobs:
       - name: Code quality analysis
         run: |
           mvn sonar:sonar -Dsonar.host.url=http://sonarqube:9000 -Dsonar.qualitygate.wait=true -Dsonar.login=admin -Dsonar.password=adminn
-
 
   deploy:
     needs: qa
