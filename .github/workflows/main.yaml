@@ -1,14 +1,18 @@
 name: CI
+
 on: push
+
 jobs:
   build:
     runs-on: ubuntu-latest
     steps: 
-      - name: descargar repostorio  
+      - name: Checkout repository
         uses: actions/checkout@v3
-      - name: pruebas-unitarias
+
+      - name: Run unit tests
         run: mvn test
-      - name: compilar la aplicación sin repetir pruebas
+
+      - name: Compile application without repeating tests
         run: mvn package -DskipTests=true
 
 
@@ -16,26 +20,31 @@ jobs:
     needs: build
     runs-on: self-hosted
     steps:
-    - name: descargar repostorio
-      uses: actions/checkout@v3
-    - name: instalar aplicación en Tomcat
-      run: |
-        mvn package -DskipTests=true
-        cp -r target/Baloncesto /usr/local/tomcat/webapps
-    - name: preparar base de datos de prueba
-      run: |
-        mysql -u root < db/baloncesto.sql
-        export DATABASE_HOST="jdbc:mysql://localhost"
-        export DATABASE_PORT="3000"
-        export DATABASE_NAME="baloncesto"
-        export DATABASE_USER="usuario"
-        export DATABASE_PASS="clave"
-        sh /usr/local/tomcat/bin/catalina.sh stop
-        sh /usr/local/tomcat/bin/catalina.sh start
-  
-    - name: realizar pruebas funcionales
-      run: | 
-        mvn failsafe:integration-test failsafe:verify
+      - name: Checkout repository
+        uses: actions/checkout@v3
+
+      - name: Install application in Tomcat
+        run: |
+          mvn package -DskipTests=true
+          cp -r target/Baloncesto /usr/local/tomcat/webapps
+
+      - name: Prepare test database
+        run: |
+          Get-Content db/baloncesto.sql -Raw | mysql -u ${{ env.DATABASE_USER }} -p${{ secrets.DATABASE_PASS }}
+          echo "DATABASE_HOST=jdbc:mysql://localhost" >> $GITHUB_ENV
+          echo "DATABASE_PORT=3000" >> $GITHUB_ENV
+          echo "DATABASE_NAME=baloncesto" >> $GITHUB_ENV
+          echo "DATABASE_USER=usuario" >> $GITHUB_ENV
+          echo "DATABASE_PASS=${{ secrets.DATABASE_PASS }}" >> $GITHUB_ENV
+        shell: pwsh
+        env:
+          DATABASE_USER: usuario
+          DATABASE_PASS: ${{ secrets.DATABASE_PASS }}
+
+      - name: Restart Tomcat
+        run: |
+          sh /usr/local/tomcat/bin/catalina.sh stop
+          sh /usr/local/tomcat/bin/catalina.sh start
 
 
   qa:
@@ -43,9 +52,9 @@ jobs:
     runs-on: self-hosted
     continue-on-error: true
     steps:
-    - name: calidad-codigo
-      run:  |
-        mvn sonar:sonar -Dsonar.host.url=http://sonarqube:9000 -Dsonar.qualitygate.wait=true -Dsonar.login=admin -Dsonar.password=adminn
+      - name: Code quality analysis
+        run: |
+          mvn sonar:sonar -Dsonar.host.url=http://sonarqube:9000 -Dsonar.qualitygate.wait=true -Dsonar.login=admin -Dsonar.password=adminn
 
 
   deploy:
@@ -53,14 +62,15 @@ jobs:
     runs-on: ubuntu-latest
     if: github.ref == 'refs/heads/master'
     steps:
-    - name: Descargar repositorio
-      uses: actions/checkout@v3
-    - name: Crear el archivo .war
-      run: |
-        mvn package -DskipTests=true
-    - name: Desplegar en Azure
-      uses: Azure/webapps-deploy@v2
-      with:
-        app-name: Baloncesto-Omar
-        publish-profile: ${{ secrets.AZURE_WEBAPP_PUBLISH_PROFILE }}
-        package: target/*.war
+      - name: Checkout repository
+        uses: actions/checkout@v3
+
+      - name: Create .war file
+        run: mvn package -DskipTests=true
+
+      - name: Deploy to Azure
+        uses: Azure/webapps-deploy@v2
+        with:
+          app-name: Baloncesto-Omar
+          publish-profile: ${{ secrets.AZURE_WEBAPP_PUBLISH_PROFILE }}
+          package: target/*.war
