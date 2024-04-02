@@ -30,22 +30,17 @@ jobs:
 
       - name: Prepare test database
         run: |
-          Get-Content db/baloncesto.sql -Raw | mysql -u ${{ env.DATABASE_USER }} -p${{ secrets.DATABASE_PASS }}
-          echo "DATABASE_HOST=jdbc:mysql://localhost" >> $GITHUB_ENV
-          echo "DATABASE_PORT=3000" >> $GITHUB_ENV
-          echo "DATABASE_NAME=baloncesto" >> $GITHUB_ENV
-          echo "DATABASE_USER=root" >> $GITHUB_ENV
-          echo "DATABASE_PASS=${{ secrets.DATABASE_PASS }}" >> $GITHUB_ENV
-        shell: powershell
-        env:
-          DATABASE_USER: root
-          DATABASE_PASS: ${{ secrets.DATABASE_PASS }}
-
-      - name: Restart Tomcat
-        run: |
+          mysql -u root < db/baloncesto.sql
+          export DATABASE_HOST="jdbc:mysql://localhost"
+          export DATABASE_PORT="3000"
+          export DATABASE_NAME="baloncesto"
+          export DATABASE_USER="usuario"
+          export DATABASE_PASS="clave"
           sh /usr/local/tomcat/bin/catalina.sh stop
           sh /usr/local/tomcat/bin/catalina.sh start
-
+      - name: realizar pruebas funcionales
+        run: |
+          mvn failsafe:integration-test failsafe:verify
 
   qa:
     needs: test
