@@ -32,13 +32,13 @@ jobs:
         run: |
           Get-Content db/baloncesto.sql -Raw | mysql -u ${{ env.DATABASE_USER }} -p${{ secrets.DATABASE_PASS }}
           echo "DATABASE_HOST=jdbc:mysql://localhost" >> $GITHUB_ENV
-          echo "DATABASE_PORT=3306" >> $GITHUB_ENV
+          echo "DATABASE_PORT=3000" >> $GITHUB_ENV
           echo "DATABASE_NAME=baloncesto" >> $GITHUB_ENV
-          echo "DATABASE_USER=root" >> $GITHUB_ENV
+          echo "DATABASE_USER=usuario" >> $GITHUB_ENV
           echo "DATABASE_PASS=${{ secrets.DATABASE_PASS }}" >> $GITHUB_ENV
         shell: powershell
         env:
-          DATABASE_USER: root
+          DATABASE_USER: usuario
           DATABASE_PASS: ${{ secrets.DATABASE_PASS }}
 
       - name: Restart Tomcat
