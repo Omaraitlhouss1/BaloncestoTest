@@ -30,18 +30,14 @@ jobs:
 
       - name: Prepare test database (Windows PowerShell)
         run: |
-          $Env:DATABASE_HOST="jdbc:mysql://localhost"
-          $Env:DATABASE_PORT="3000"
-          $Env:DATABASE_NAME="baloncesto"
-          $Env:DATABASE_USER="root"
-          $Env:DATABASE_PASS="admin"
-          Get-Content db\baloncesto.sql -Raw | mysql -u $Env:DATABASE_USER -p$Env:DATABASE_PASS -h localhost
-          Start-Process -FilePath "C:\usr\local\tomcat\bin\catalina.bat" -ArgumentList "stop" -NoNewWindow -Wait
-          Start-Process -FilePath "C:\usr\local\tomcat\bin\catalina.bat" -ArgumentList "start" -NoNewWindow -Wait
-        shell: powershell
-        env:
-          DATABASE_USER: root
-          DATABASE_PASS: ${{ secrets.DATABASE_PASS }}
+          mysql -u root < db/baloncesto.sql
+          export DATABASE_HOST="jdbc:mysql://localhost"
+          export DATABASE_PORT="3000"
+          export DATABASE_NAME="baloncesto"
+          export DATABASE_USER="root"
+          export DATABASE_PASS="admin"
+          sh /usr/local/tomcat/bin/catalina.sh stop
+          sh /usr/local/tomcat/bin/catalina.sh start
 
       - name: Run functional tests
         run: mvn failsafe:integration-test failsafe:verify
