@@ -34,8 +34,8 @@ jobs:
           export DATABASE_HOST="jdbc:mysql://localhost"
           export DATABASE_PORT="3000"
           export DATABASE_NAME="baloncesto"
-          export DATABASE_USER="root"
-          export DATABASE_PASS="admin"
+          export DATABASE_USER="usuario"
+          export DATABASE_PASS="clave"
           sh /usr/local/tomcat/bin/catalina.sh stop
           sh /usr/local/tomcat/bin/catalina.sh start
 
