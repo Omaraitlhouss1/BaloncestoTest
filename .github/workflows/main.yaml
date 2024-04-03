@@ -8,10 +8,8 @@ jobs:
     steps:
       - name: Checkout repository
         uses: actions/checkout@v3
-
-      - name: Run unit tests
+      - name: pruebas-unitarias
         run: mvn test
-
       - name: Compile application without repeating tests
         run: mvn package -DskipTests=true
 
@@ -21,13 +19,10 @@ jobs:
     steps:
       - name: Checkout repository
         uses: actions/checkout@v3
-
-      - name: Install application in Tomcat (Windows PowerShell)
+      - name: instalar aplicación en Tomcat
         run: |
           mvn package -DskipTests=true
-          Copy-Item -Path target\Baloncesto -Destination C:\usr\local\tomcat\webapps -Recurse -Force
-        shell: powershell
-
+          cp -r target/Baloncesto /usr/local/tomcat/webapps
       - name: Prepare test database (Windows PowerShell)
         run: |
           mysql -u root < db/baloncesto.sql
@@ -38,16 +33,16 @@ jobs:
           export DATABASE_PASS="clave"
           sh /usr/local/tomcat/bin/catalina.sh stop
           sh /usr/local/tomcat/bin/catalina.sh start
-        shell: powershell
-      - name: Run functional tests
-        run: mvn failsafe:integration-test failsafe:verify
+      - name: realizar pruebas funcionales
+        run: |
+          mvn failsafe:integration-test failsafe:verify
 
   qa:
     needs: test
     runs-on: self-hosted
     continue-on-error: true
     steps:
-      - name: Code quality analysis
+      - name: calidad-codigo
         run: |
           mvn sonar:sonar -Dsonar.host.url=http://sonarqube:9000 -Dsonar.qualitygate.wait=true -Dsonar.login=admin -Dsonar.password=adminn
 
@@ -56,13 +51,12 @@ jobs:
     runs-on: ubuntu-latest
     if: github.ref == 'refs/heads/master'
     steps:
-      - name: Checkout repository
+      - name: descargar repostorio
         uses: actions/checkout@v3
-
-      - name: Create .war file
-        run: mvn package -DskipTests=true
-
-      - name: Deploy to Azure
+      - name: Crear el archivo .war
+        run: |
+          mvn package -DskipTests=true
+      - name: Desplegar en Azure
         uses: Azure/webapps-deploy@v2
         with:
           app-name: Baloncesto-Omar
