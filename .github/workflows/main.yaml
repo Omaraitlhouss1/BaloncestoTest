@@ -6,11 +6,11 @@ jobs:
   build:
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout repository
+      - name: descargar repostorio
         uses: actions/checkout@v3
       - name: pruebas-unitarias
         run: mvn test
-      - name: Compile application without repeating tests
+      - name: compilar la aplicación sin repetir pruebas
         run: mvn package -DskipTests=true
 
   test:
